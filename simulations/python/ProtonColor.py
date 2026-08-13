@@ -584,6 +584,65 @@ def foci_geometry_report() -> None:
 
 
 
+
+def arc_length_deficit() -> None:
+    """
+    Может ли дефицит обхода возникать из вращения триады (5.11.6)?
+
+    Скорость продвижения по параметру вдоль намотанной нити не постоянна:
+        |dC/dtheta| = sqrt(rad^2 + r^2/4),  rad = R + r cos(theta/2).
+    Значит сигнал постоянной скорости покрывает разный угол в разных местах.
+    Проверяем, даёт ли этот механизм требуемые доли 2/3, 2/3, -1/3.
+    """
+    import numpy as np
+    from scipy.optimize import brentq
+
+    R_over_r, rr = math.sqrt(3.0), 1.0
+
+    def speed(th):
+        rad = R_over_r * rr + rr * np.cos(0.5 * np.asarray(th, dtype=float))
+        return np.sqrt(rad ** 2 + rr ** 2 / 4.0)
+
+    th = np.linspace(0.0, 4.0 * math.pi, 200001)
+    v = speed(th)
+    total = float(np.trapezoid(v, th))
+
+    print("-" * 78)
+    print("11. ДЕФИЦИТ ОБХОДА ИЗ ВРАЩЕНИЯ: ПРОВЕРКА ГИПОТЕЗЫ")
+    print("-" * 78)
+    print()
+    print(_row("|dC/dtheta| минимум (горловина)", f"{v.min():.4f}", "r", "M"))
+    print(_row("|dC/dtheta| максимум (периферия)", f"{v.max():.4f}", "r", "M"))
+    print(_row("отношение", f"{v.max() / v.min():.3f}", "", "M",
+               "скорость по параметру втрое разная"))
+    print(_row("полная длина обхода 4pi", f"{total:.4f}", "r", "M"))
+    print()
+
+    def dtheta_for_len(th0, target):
+        def f(d):
+            grid = np.linspace(th0, th0 + d, 4000)
+            return float(np.trapezoid(speed(grid), grid)) - target
+        return brentq(f, 1e-6, 6.0 * math.pi)
+
+    target = total / 3.0
+    print(f"  Равная длина пути = L/3 = {target:.4f} r из трёх фокусов:")
+    print()
+    print(f"  {'мода':>5} {'d(theta)':>10} {'доля 4pi':>10} {'требуется':>11}")
+    need = {"u1": "+0.6667", "d": "-0.3333", "u2": "+0.6667"}
+    for name, th0 in (("u1", 0.0), ("d", 2 * math.pi / 3),
+                      ("u2", 4 * math.pi / 3)):
+        d = dtheta_for_len(th0, target)
+        print(f"  {name:>5} {d:>10.4f} {d / (4 * math.pi):>10.4f} "
+              f"{need[name]:>11}")
+    print()
+    print("  Ни одно значение не совпадает с требуемым, и два u получаются")
+    print("  РАЗНЫМИ. Механизм метрический и непрерывный, а заряд протона")
+    print("  квантован точнее 1e-21 — значит источник обязан быть")
+    print("  топологическим (число намотки), а не отношением длин.")
+    print("  Дискретный счёт по рёбрам контура это и даёт: d(phi)/4pi = 1/3.")
+    print()
+
 if __name__ == "__main__":
     report()
     foci_geometry_report()
+    arc_length_deficit()

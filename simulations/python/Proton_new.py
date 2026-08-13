@@ -46,8 +46,9 @@ import lib.backend  # noqa: F401  - выбор бэкенда до импорт�
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+from matplotlib import colors as mcolors
 from matplotlib.collections import LineCollection
-from matplotlib.patches import Arc, Circle
+from matplotlib.patches import Arc, Circle, FancyArrowPatch
 from mpl_toolkits.mplot3d.art3d import Line3DCollection
 
 from lib.modes import to_segments
@@ -73,9 +74,18 @@ PSI_0 = {"u1": 0.0, "u2": math.pi, "d": 0.0}
 #: omega_d = omega_u / 2 — та же гипотеза, что и «d занимает одну плоскость» (5.11.2)
 OMEGA = {"u1": 1.0, "u2": 1.0, "d": 0.5}
 
+#: число ортогональных плоскостей вращения, задействованных модой (5.2):
+#: u использует две из трёх, d заперт в одной. |q| = n_planes / D, D = 3.
+PLANES = {"u1": 2, "u2": 2, "d": 1}
+
+#: направление топологической намотки. У d знак инвертирован относительно u
+#: (5.2) — та же операция, что различает электрон и позитрон.
+SENSE = {"u1": +1, "u2": +1, "d": -1}
+
 #: доля полного спинорного обхода 4pi за один цветовой оборот (5.11.1-5.11.2)
 LEG = Fraction(1, 3)
-ARC = {"u1": 2 * LEG, "u2": 2 * LEG, "d": -LEG}
+#: заряд собирается из двух множителей: сколько плоскостей и в какую сторону.
+ARC = {k: Fraction(SENSE[k] * PLANES[k], 3) for k in PLANES}
 
 #: начальные цветовые фазы: три цвета, разнесённые на 1/3 радужного круга.
 #: Одно ребро цветового контура есть d(phi)/4pi = 1/3 полного обхода (5.11.1).
@@ -86,19 +96,29 @@ COLOUR_0 = {"u1": Fraction(0), "d": Fraction(1, 3), "u2": Fraction(2, 3)}
 #: Величина выведена, а не подобрана.
 PHASE_PER_TURN = 4.0 * math.pi
 
+#: радиальные сдвиги трёх дуг внутри трубки — чтобы они не сливались в одну
+#: линию там, где идут по общему участку нити. Величина чисто изобразительная.
+ARC_OFFSET = {"u1": 0.22, "d": 0.0, "u2": -0.22}
+
 #: сколько цветовых оборотов проигрывает анимация. Каждый фокус возвращает
 #: свой исходный цвет ровно через 3 оборота (проверка в check(), пункт 6).
 TURNS = 3
 
-#: ВНИМАНИЕ: обе амплитуды ниже — иллюстративные. Модель фиксирует положение
-#: равновесия d(theta) = 2pi/3 (условие замыкания цветового контура, 5.9), но
-#: НЕ даёт амплитуды колебаний около него. Значения подобраны для читаемости
-#: картинки и физического содержания не несут.
-AMP_D = math.pi / 8.0           # амплитуда качания d-маятника по theta
-#: амплитуда дифференциальной отдачи двух u; знаки противоположны (5.10.3).
-#: При EPS < AMP_D зазоры d-u1 и u2-d ходят в противофазе — это и есть признак
-#: того, что отдача дифференциальная, а не синфазная.
-EPS_RECOIL = 0.10
+#: Поворот керна за один цветовой оборот. Величина НЕ выведена (см. T-35):
+#: сам факт вращения триады модель не фиксирует. Значение 4pi/3 выбрано из
+#: соображения соизмеримости — при нём три цветовых оборота дают Theta = 4pi,
+#: то есть полный спинорный обход, и дыхание триады возвращается в исходную
+#: форму ровно тогда же, когда цвета возвращаются к себе.
+KERN_TURN = 4.0 * math.pi / 3.0
+
+#: усиление наведённого отклика d-фокуса на асимметрию расстояний до двух u.
+#: Иллюстративное: модель фиксирует равновесие d(theta) = 2pi/3, но не
+#: жёсткость отклика.
+GAIN_D = 0.45
+
+#: амплитуда дифференциальной отдачи двух u на смещение d; знаки
+#: противоположны (5.10.3). Тоже иллюстративная.
+EPS_RECOIL = 0.25
 
 #: экспериментальные и модельные величины для перевода в фемтометры (5.9, 5.10.6)
 HBAR_C = 197.3269804            # МэВ*фм
@@ -122,19 +142,123 @@ def wound_curve(theta, phase_shift: float = 0.0):
     return rad * np.cos(theta), rad * np.sin(theta), r * np.sin(phi)
 
 
-def focus_thetas(t: float) -> dict:
+def local_frame(theta: float):
     """
-    Положения трёх фокусов в момент t с ДИФФЕРЕНЦИАЛЬНОЙ отдачей.
+    Ортонормированный репер в точке нити: (t, n, b).
 
-    d качается около 2pi/3; знак его смещения определяет, к какому u он ближе,
-    поэтому поправки к u входят с противоположными знаками (5.10.3).
+    t — касательная к нити (направление обхода),
+    n — от оси трубки к точке (радиальная в сечении),
+    b = t x n.
+
+    Три ортогональные плоскости вращения — это (n,b), (t,n), (t,b).
+    Именно они, а не путь нити, несут структуру моды: сколько плоскостей
+    задействовано (заряд) и в какую сторону идёт вращение (знак).
     """
-    swing = math.sin(2.0 * t)
+    h = 1e-6
+    p0 = _point_raw(theta)
+    t = _point_raw(theta + h) - _point_raw(theta - h)
+    t /= np.linalg.norm(t)
+    centre = np.array([R * math.cos(theta), R * math.sin(theta), 0.0])
+    n = p0 - centre
+    n -= np.dot(n, t) * t
+    n /= np.linalg.norm(n)
+    b = np.cross(t, n)
+    return t, n, b
+
+
+def wound_curve_offset(theta, off: float = 0.0):
+    """
+    Та же намотка, но на радиусе трубки r + off.
+
+    Нормаль к нити в сечении трубки есть n = (cos(phi)cos(th), cos(phi)sin(th),
+    sin(phi)), поэтому сдвиг вдоль n сводится к замене r -> r + off.
+    Нужен, чтобы три дуги, идущие по общей нити, не сливались в одну линию.
+    """
+    theta = np.asarray(theta, dtype=float)
+    phi = 0.5 * theta
+    rr = r + off
+    rad = R + rr * np.cos(phi)
+    return rad * np.cos(theta), rad * np.sin(theta), rr * np.sin(phi)
+
+
+def mode_arc(theta0: float, frac, progress: float, off: float = 0.0,
+             num: int = 260):
+    """
+    Дуга, пройденная модой за долю progress цветового оборота.
+
+    Полный спинорный обход есть 4pi по theta. Мода проходит за оборот долю
+    frac от него: u — плюс 2/3 (то есть 8pi/3 вперёд), d — минус 1/3
+    (4pi/3 назад). Ни одна дуга сама на себя не замыкается — это и есть
+    «дефицит обхода» (5.11.1), видимый непосредственно.
+    """
+    span = float(frac) * 4.0 * math.pi * progress
+    th = np.linspace(theta0, theta0 + span, num)
+    x, y, z = wound_curve_offset(th, off)
+    return th, np.stack([x, y, z], axis=1)
+
+
+def front_ticks(th, off: float = 0.0, half: float = 0.13, step: int = 22):
+    """Поперечные штрихи волнового фронта поперёк трубки — как в сцене электрона."""
+    sel = th[::step]
+    if len(sel) == 0:
+        return np.zeros((0, 2, 3))
+    a = np.stack(wound_curve_offset(sel, off - half), axis=1)
+    b = np.stack(wound_curve_offset(sel, off + half), axis=1)
+    return np.stack([a, b], axis=1)
+
+
+def _slots(theta_kern: float) -> dict:
+    """Три геометрических гнезда триады при повороте керна на theta_kern."""
     return {
-        "u1": THETA_0["u1"] - EPS_RECOIL * swing,
-        "d": THETA_0["d"] + AMP_D * swing,
-        "u2": THETA_0["u2"] + EPS_RECOIL * swing,
+        "u1": theta_kern,
+        "d": theta_kern + 2.0 * math.pi / 3.0,
+        "u2": theta_kern + 4.0 * math.pi / 3.0,
     }
+
+
+def _point_raw(theta: float) -> np.ndarray:
+    x, y, z = wound_curve(theta)
+    return np.array([float(x), float(y), float(z)])
+
+
+_point = _point_raw
+
+
+def focus_thetas(turn: float, iters: int = 12) -> dict:
+    """
+    Положения трёх фокусов при цветовом обороте turn.
+
+    Керн (пара u) вращается по намотке: theta_kern = KERN_TURN * turn. Из-за
+    мёбиусовой намотки rad = R + r cos(theta/2) треугольник фокусов при этом
+    НЕ жёсткий — расстояние между двумя u дышит с размахом около 45%
+    (проверка в check(), пункт 8).
+
+    d-фокус не задан руками, а НАВЕДЁН: он смещается вдоль нити в сторону,
+    выравнивающую расстояния до двух u. Это отклик на реакцию пары, а не
+    независимое качание. Решается простой итерацией до неподвижной точки;
+    смещение d, в свою очередь, даёт двум u дифференциальную отдачу
+    противоположных знаков (5.10.3).
+    """
+    base = _slots(KERN_TURN * turn)
+    delta = 0.0
+    for _ in range(iters):
+        recoil = EPS_RECOIL * delta
+        th = {"u1": base["u1"] - recoil,
+              "d": base["d"] + delta,
+              "u2": base["u2"] + recoil}
+        p = {k: _point(v) for k, v in th.items()}
+        d1 = float(np.linalg.norm(p["d"] - p["u1"]))
+        d2 = float(np.linalg.norm(p["d"] - p["u2"]))
+        asym = (d1 - d2) / (0.5 * (d1 + d2))
+        delta_new = -GAIN_D * asym         # сдвиг к более далёкому u
+        if abs(delta_new - delta) < 1e-12:
+            delta = delta_new
+            break
+        delta = 0.5 * (delta + delta_new)  # демпфирование итерации
+    recoil = EPS_RECOIL * delta
+    return {"u1": base["u1"] - recoil,
+            "d": base["d"] + delta,
+            "u2": base["u2"] + recoil}
 
 
 #: сдвиг цветовой фазы за один цветовой оборот, общий для всех трёх фокусов.
@@ -172,9 +296,9 @@ def colour_permutation(n: int) -> dict:
     return {k: (COLOUR_0[k] + COLOUR_STEP * n) % 1 for k in COLOUR_0}
 
 
-def focus_psis(t: float) -> dict:
+def focus_psis(turn: float) -> dict:
     """Фазы возбуждения — независимая переменная, в геометрию НЕ входит."""
-    return {k: PSI_0[k] + OMEGA[k] * 2.0 * t for k in PSI_0}
+    return {k: PSI_0[k] + OMEGA[k] * PHASE_PER_TURN * turn for k in PSI_0}
 
 
 def triangle_metrics(thetas: dict) -> dict:
@@ -260,7 +384,16 @@ def check() -> None:
           f"(= pi = {math.pi:.6f}, условие Паули)")
     print("   psi входит только в яркость/размер маркера, в координаты — нет")
 
-    print("\n5. Счётчик доли обхода и заряд (5.11)")
+    print("\n5. Заряд из двух множителей: сколько плоскостей и в какую сторону (5.2)")
+    print(f"   {'мода':>5} {'плоскостей':>11} {'намотка':>9} {'|q| = n/3':>10} {'q':>7}")
+    for k in ("u1", "u2", "d"):
+        print(f"   {LABELS[k]:>5} {PLANES[k]:>11} {SENSE[k]:>+9d} "
+              f"{Fraction(PLANES[k], 3)!s:>10} {ARC[k]!s:>7}")
+    print("   формула 5.2:  |q| = n_плоскостей / D,  D = 3;  знак — направление")
+    print("   намотки (у d инвертировано, как у позитрона относительно электрона)")
+    print("   цвет отвечает на вопрос КАКИЕ плоскости, заряд — СКОЛЬКО их")
+
+    print("\n5b. Счётчик доли обхода и заряд (5.11)")
     total = sum(ARC.values())
     for k in ("u1", "u2", "d"):
         print(f"   {LABELS[k]:<3} дуга = {ARC[k]} * 4pi "
@@ -296,14 +429,48 @@ def check() -> None:
     print("      каждый фокус возвращает свой цвет через 3 оборота")
 
     print("\n7. Что бежит, а что стоит")
-    print(f"   T_d = 2pi/omega_d = 4pi/omega,  T_цв = 3*d(phi)/omega = 4pi/omega")
-    print(f"   => набег внутренней фазы за цветовой оборот = omega*T_цв = 4pi")
+    print("   T_d = 2pi/omega_d = 4pi/omega,  T_цв = 3*d(phi)/omega = 4pi/omega")
+    print("   => набег внутренней фазы за цветовой оборот = omega*T_цв = 4pi")
     print(f"      = {PHASE_PER_TURN / (2 * math.pi):.0f} полных цикла 2pi "
-          "(в скрипте PHASE_PER_TURN)")
-    print("   фаза бежит по нити; амплитуда и фокусы стоят — структура Q-шара")
-    print("   f(r) e^{i omega t}: модуль статичен, фаза вращается (2.4.2, 2.5)")
-    print("   орбитального вращения триады нет: спин 1/2 уже даёт замыкание 4pi,")
-    print("   вращение фокусов добавило бы момент сверх наблюдаемого")
+          "(PHASE_PER_TURN, величина ВЫВЕДЕНА)")
+    print("   керн вращается по намотке: Theta = KERN_TURN * turn,")
+    print(f"      KERN_TURN = 4pi/3 за оборот => за {TURNS} оборота Theta = 4pi,")
+    print("      то есть полный спинорный обход. Сама величина НЕ выведена:")
+    print("      замыкание 4pi даёт полуцелость J, а не его величину")
+    print("      (Delta-изобара — тот же тор, спин 3/2). См. T-35.")
+
+    print("\n8. Дыхание триады при вращении керна")
+    th4 = np.linspace(0.0, 4.0 * math.pi, 4001)
+    kern = np.array([float(np.linalg.norm(_point(t) - _point(t + 4 * math.pi / 3)))
+                     for t in th4])
+    print(f"   расстояние u1-u2 при жёстком повороте: min {kern.min():.4f} r, "
+          f"max {kern.max():.4f} r")
+    print(f"   размах {100 * (kern.max() - kern.min()) / kern.mean():.1f} % — "
+          "керн то сближается, то отдаляется")
+    print(f"   период по Theta равен 4pi: |P(0) - P(4pi)| = "
+          f"{float(np.linalg.norm(_point(0.0) - _point(4 * math.pi))):.2e}")
+    print("   причина — мёбиусова намотка rad = R + r cos(theta/2):")
+    print("   треугольник фокусов не жёсткий, при повороте меняет форму")
+
+    print("\n9. Наведённый отклик d-фокуса")
+    print(f"   {'оборот':>7} {'delta_d':>9} {'|d-u1|':>9} {'|d-u2|':>9} "
+          f"{'асимм.':>9} {'без отклика':>12}")
+    for tv in (0.0, 0.25, 0.5, 0.75, 1.0):
+        th = focus_thetas(tv)
+        p = {k: _point(v) for k, v in th.items()}
+        d1 = float(np.linalg.norm(p["d"] - p["u1"]))
+        d2 = float(np.linalg.norm(p["d"] - p["u2"]))
+        delta = th["d"] - (KERN_TURN * tv + 2 * math.pi / 3)
+        b = _slots(KERN_TURN * tv)
+        q = {k: _point(v) for k, v in b.items()}
+        b1 = float(np.linalg.norm(q["d"] - q["u1"]))
+        b2 = float(np.linalg.norm(q["d"] - q["u2"]))
+        print(f"   {tv:7.2f} {delta:9.5f} {d1:9.4f} {d2:9.4f} "
+              f"{(d1 - d2) / (0.5 * (d1 + d2)):9.5f} "
+              f"{(b1 - b2) / (0.5 * (b1 + b2)):12.5f}")
+    print("   d не задан руками: он смещается к более далёкому u, выравнивая")
+    print("   расстояния; смещение d даёт двум u отдачу противоположных знаков.")
+    print("   Усиление GAIN_D и EPS_RECOIL моделью не выводятся.")
 
     print("\n" + line)
 
@@ -314,19 +481,20 @@ def check() -> None:
 
 
 def build_figure():
-    fig = plt.figure(figsize=(15.5, 9.5), facecolor="black")
-    gs = fig.add_gridspec(3, 2, width_ratios=(1.30, 1.0),
-                          height_ratios=(1.0, 1.05, 0.80),
-                          left=0.02, right=0.97, top=0.91, bottom=0.06,
-                          wspace=0.08, hspace=0.62)
+    fig = plt.figure(figsize=(16.0, 11.5), facecolor="black")
+    gs = fig.add_gridspec(4, 2, width_ratios=(1.25, 1.0),
+                          height_ratios=(0.80, 0.95, 1.00, 0.80),
+                          left=0.02, right=0.97, top=0.93, bottom=0.05,
+                          wspace=0.06, hspace=0.60)
 
     ax3d = fig.add_subplot(gs[:, 0], projection="3d", facecolor="black")
-    ax_arc = fig.add_subplot(gs[0, 1], facecolor="black")
-    ax_col = fig.add_subplot(gs[1, 1], facecolor="black")
-    ax_rec = fig.add_subplot(gs[2, 1], facecolor="black")
+    ax_q = fig.add_subplot(gs[0, 1], facecolor="black")
+    ax_arc = fig.add_subplot(gs[1, 1], facecolor="black")
+    ax_col = fig.add_subplot(gs[2, 1], facecolor="black")
+    ax_rec = fig.add_subplot(gs[3, 1], facecolor="black")
 
     fig.suptitle("Протон: одна намотка, три фокуса, замыкание обхода",
-                 color="white", fontsize=15, y=0.965)
+                 color="white", fontsize=15, x=0.28, y=0.975)
 
     # --- 3D ---
     ax3d.grid(False)
@@ -357,6 +525,21 @@ def build_figure():
     ax3d.text(float(gx), float(gy), float(gz) - 0.45 * r,
               "горловина, θ = 2π", color="#898781", fontsize=8.5)
 
+    # локальные петли вращения: до двух на моду (u — две плоскости, d — одна)
+    # дуга, пройденная каждой модой за цветовой оборот: 8pi/3 вперёд у u,
+    # 4pi/3 назад у d. Радиальные сдвиги, чтобы три дуги не сливались.
+    arcs, arc_ticks, arc_fronts = {}, {}, {}
+    for k in COLORS:
+        lc = Line3DCollection(np.zeros((1, 2, 3)), linewidths=4.5)
+        ax3d.add_collection3d(lc)
+        arcs[k] = lc
+        tk = Line3DCollection(np.zeros((1, 2, 3)), linewidths=1.4,
+                              colors=[(*mcolors.to_rgb(COLORS[k]), 0.55)])
+        ax3d.add_collection3d(tk)
+        arc_ticks[k] = tk
+        arc_fronts[k] = ax3d.plot([], [], [], marker="o", ms=10.0, ls="none",
+                                  color=COLORS[k], mec="white", mew=1.0)[0]
+
     tri = ax3d.plot([], [], [], color="white", lw=1.1, ls="--", alpha=0.55)[0]
     # заливка маркера = цветовая фаза, обод = опознавательный цвет моды,
     # размер и яркость = фаза возбуждения psi. Три атрибута — три переменные.
@@ -367,6 +550,56 @@ def build_figure():
                          weight="bold") for k in COLORS}
     note3d = ax3d.text2D(0.01, 0.02, "", transform=ax3d.transAxes,
                          color="#b9b9b4", fontsize=9, va="bottom")
+
+    # --- откуда берётся заряд ---
+    ax_q.set_xlim(-0.1, 10.2)
+    ax_q.set_ylim(-1.25, 4.05)
+    ax_q.axis("off")
+    ax_q.set_title("Откуда берётся ±2/3 и ∓1/3\n"
+                   "заряд — СКОЛЬКО плоскостей, цвет — КАКИЕ (5.2)",
+                   color="white", fontsize=11, pad=6)
+    slot_patches, sense_arcs, q_texts = {}, {}, {}
+    for row, k in enumerate(("u1", "d", "u2")):
+        y = 2.9 - row
+        ax_q.text(0.55, y, LABELS[k], color=COLORS[k], fontsize=12,
+                  weight="bold", ha="center", va="center")
+        cells = []
+        for j in range(3):
+            cx = 1.9 + 1.05 * j
+            ax_q.add_patch(Circle((cx, y), 0.40, fill=False, ec="#4a4a46",
+                                  lw=1.1))
+            c = Circle((cx, y), 0.34, fc="none", ec="none")
+            ax_q.add_patch(c)
+            cells.append(c)
+            if row == 0:
+                ax_q.text(cx, 3.62, f"{j + 1}", color="#6a6a64", fontsize=8.5,
+                          ha="center", va="center")
+        slot_patches[k] = cells
+        # знак намотки: кривая стрелка, направление читается однозначно
+        cx0 = 5.85
+        p1, p2 = (cx0 - 0.42, y - 0.10), (cx0 + 0.42, y - 0.10)
+        src, dst = (p1, p2) if SENSE[k] > 0 else (p2, p1)
+        rad = 0.6 if SENSE[k] > 0 else -0.6
+        ax_q.add_patch(FancyArrowPatch(
+            src, dst, connectionstyle=f"arc3,rad={rad}", color=COLORS[k],
+            lw=2.0, arrowstyle="-|>", mutation_scale=13,
+            shrinkA=0, shrinkB=0))
+        sense_arcs[k] = None
+        ax_q.text(6.60, y, "намотка +" if SENSE[k] > 0 else "намотка −",
+                  color="#898781", fontsize=9, ha="left", va="center")
+        q_texts[k] = ax_q.text(9.75, y,
+                               f"{'+' if ARC[k] > 0 else '−'}"
+                               f"{abs(ARC[k])}",
+                               color=COLORS[k], fontsize=13, weight="bold",
+                               ha="right", va="center")
+    ax_q.plot([1.4, 9.9], [0.28, 0.28], color="#4a4a46", lw=0.9)
+    ax_q.text(9.75, -0.16, "+2/3 + 2/3 − 1/3 = +1", color="white",
+              fontsize=12, weight="bold", ha="right", va="center")
+    ax_q.text(0.1, -0.90,
+              "закрашенные кружки — задействованные плоскости вращения, их цвет "
+              "есть цветовой заряд;\nпереключение происходит скачком при "
+              "цветовом обмене. Гипотеза 5.2, не вывод.",
+              color="#898781", fontsize=8.5, ha="left", va="center")
 
     # --- счётчик обхода ---
     ax_arc.set_aspect("equal")
@@ -437,38 +670,45 @@ def build_figure():
     col_note = ax_col.text(0, -1.72, "", color="#b9b9b4", fontsize=9.5,
                            ha="center", va="top")
 
-    # --- отдача ---
+    # --- дыхание триады ---
     ax_rec.set_facecolor("black")
-    ax_rec.set_title("Дифференциальная отдача: зазоры ходят в противофазе\n"
-                     "равновесие Δθ = 2π/3 фиксировано моделью, амплитуды — нет",
+    ax_rec.set_title("Дыхание триады при вращении керна\n"
+                     "Θ = 4π/3 за цветовой оборот; за 3 оборота полный обход 4π",
                      color="white", fontsize=10.5, pad=4)
-    ts = np.linspace(0.0, 2.0 * math.pi, 400)
-    base = 2.0 * math.pi / 3.0
-    gap1 = np.array([focus_thetas(t)["d"] - focus_thetas(t)["u1"] for t in ts])
-    gap2 = np.array([focus_thetas(t)["u2"] - focus_thetas(t)["d"] for t in ts])
-    ax_rec.axhline(base, color="#4a4a46", lw=1.0, ls=":")
-    ax_rec.plot(ts, gap1, color=COLORS["u1"], lw=2.0, label="d − u₁")
-    ax_rec.plot(ts, gap2, color=COLORS["u2"], lw=2.0, label="u₂ − d")
+    ts = np.linspace(0.0, float(TURNS), 400)
+    dist = {"u1u2": [], "u1d": [], "du2": []}
+    for tv in ts:
+        th = focus_thetas(tv)
+        p = {k: _point(v) for k, v in th.items()}
+        dist["u1u2"].append(float(np.linalg.norm(p["u1"] - p["u2"])))
+        dist["u1d"].append(float(np.linalg.norm(p["u1"] - p["d"])))
+        dist["du2"].append(float(np.linalg.norm(p["d"] - p["u2"])))
+    dist = {k: np.array(v) for k, v in dist.items()}
+    ax_rec.plot(ts, dist["u1u2"], color="white", lw=2.4, label="керн u₁–u₂")
+    ax_rec.plot(ts, dist["u1d"], color=COLORS["u1"], lw=1.8, label="u₁–d")
+    ax_rec.plot(ts, dist["du2"], color=COLORS["u2"], lw=1.8, label="d–u₂")
     marker = ax_rec.plot([], [], marker="o", ls="none", color="white", ms=6)[0]
-    ax_rec.set_xlim(0, 2 * math.pi)
-    ax_rec.set_xlabel("время цикла   (синфазная отдача Proton.py дала бы "
-                      "вырождение 3e-15)", color="#898781", fontsize=8.5)
-    ax_rec.set_ylabel("Δθ между фокусами", color="#898781", fontsize=9)
+    ax_rec.set_xlim(0, float(TURNS))
+    ax_rec.set_xlabel("цветовых оборотов   (d наведён откликом на пару u)",
+                      color="#898781", fontsize=8.5)
+    ax_rec.set_ylabel("расстояние, в единицах r", color="#898781", fontsize=9)
     ax_rec.tick_params(colors="#898781", labelsize=8)
-    for s in ("top", "right"):
-        ax_rec.spines[s].set_visible(False)
-    for s in ("left", "bottom"):
-        ax_rec.spines[s].set_color("#383835")
-    leg = ax_rec.legend(frameon=False, fontsize=9, loc="upper right")
+    for sp in ("top", "right"):
+        ax_rec.spines[sp].set_visible(False)
+    for sp in ("left", "bottom"):
+        ax_rec.spines[sp].set_color("#383835")
+    leg = ax_rec.legend(frameon=False, fontsize=8.5, loc="upper right", ncol=3)
     for txt in leg.get_texts():
         txt.set_color("white")
 
     return dict(fig=fig, ax3d=ax3d, tri=tri, dots=dots, tags=tags,
+                slot_patches=slot_patches, sense_arcs=sense_arcs,
+                arcs=arcs, arc_ticks=arc_ticks, arc_fronts=arc_fronts,
                 thread=thread, thread_theta=thread_theta,
                 note3d=note3d, arc_patches=arc_patches, solo=solo,
                 arc_head=arc_head, arc_note=arc_note, col_dots=col_dots,
                 col_tags=col_tags, col_trail=col_trail, col_note=col_note,
-                marker=marker, ts=ts, gap1=gap1, gap2=gap2)
+                marker=marker, ts=ts, dist=dist)
 
 
 def make_update(state):
@@ -478,13 +718,14 @@ def make_update(state):
     arc_head, arc_note = state["arc_head"], state["arc_note"]
     col_dots, col_tags = state["col_dots"], state["col_tags"]
     col_trail, col_note = state["col_trail"], state["col_note"]
+    slot_patches, sense_arcs = state["slot_patches"], state["sense_arcs"]
+    arcs, arc_ticks = state["arcs"], state["arc_ticks"]
+    arc_fronts = state["arc_fronts"]
     thread, thread_theta = state["thread"], state["thread_theta"]
-    marker, ts = state["marker"], state["ts"]
-    gap1, gap2 = state["gap1"], state["gap2"]
+    marker, ts, dist = state["marker"], state["ts"], state["dist"]
     hsv = plt.get_cmap("hsv")
 
     def update(frame):
-        t = 2.0 * math.pi * frame / N_FRAMES
         turn = TURNS * frame / N_FRAMES        # цветовых оборотов пройдено
         cphase = focus_colour_phase(turn)
 
@@ -494,8 +735,8 @@ def make_update(state):
         run = PHASE_PER_TURN * turn
         thread.set_array(
             ((0.5 * thread_theta - run) % (2 * np.pi))[:-1] / (2 * np.pi))
-        thetas = focus_thetas(t)
-        psis = focus_psis(t)
+        thetas = focus_thetas(turn)
+        psis = focus_psis(turn)
         m = triangle_metrics(thetas)
         pts = m["points"]
 
@@ -520,7 +761,8 @@ def make_update(state):
         note3d.set_text(
             "одна замкнутая нить, θ: 0 → 4π — два витка через горловину\n"
             "фаза бежит: 2 полных цикла за цветовой оборот (T_d ≡ T_цв, 5.9.5);\n"
-            "фокусы стоят — это состояние покоя, а не заморозка\n"
+            "керн вращается по намотке, треугольник дышит на 45 %;\n"
+            "сам факт вращения моделью не выведен (T-35)\n"
             f"стороны {'/'.join(f'{v:.2f}' for v in sorted(m['sides'].values(), reverse=True))} r,"
             f" разброс {100 * m['spread']:.1f} %"
             f"   (в покое {100 * rest['spread']:.1f} %)\n"
@@ -548,6 +790,27 @@ def make_update(state):
             f"оборот {turn:.2f} из {TURNS}:   +2/3 +2/3 −1/3 = +1 круга\n"
             f"невязка замыкания {gap_deg:+.1e}°  —  тождественно нуль")
 
+        # панель заряда: какие плоскости заняты и в какую сторону намотка
+        for k in COLORS:
+            j = int(round(3.0 * cphase[k])) % 3
+            if PLANES[k] == 1:
+                active = {j}                      # d занимает одну плоскость
+            else:
+                active = {0, 1, 2} - {j}          # у u свободна плоскость j
+
+        # дуги, пройденные модами: длина = доля обхода, знак = сторона
+        prog = turn % 1.0
+        for k in COLORS:
+            th, pts = mode_arc(thetas[k], ARC[k], prog, ARC_OFFSET[k])
+            base_rgb = mcolors.to_rgb(COLORS[k])
+            if len(pts) > 1:
+                arcs[k].set_segments(to_segments(pts[:, 0], pts[:, 1], pts[:, 2]))
+                ramp = np.linspace(0.25, 1.0, len(pts) - 1)
+                arcs[k].set_color([(*base_rgb, float(a)) for a in ramp])
+                arc_ticks[k].set_segments(front_ticks(th, ARC_OFFSET[k]))
+                arc_fronts[k].set_data([pts[-1, 0]], [pts[-1, 1]])
+                arc_fronts[k].set_3d_properties([pts[-1, 2]])
+
         # цветовой круг
         for k in COLORS:
             a = 2.0 * math.pi * cphase[k]
@@ -570,10 +833,14 @@ def make_update(state):
             "синглет держится непрерывно, а не только на целых оборотах\n"
             "свой цвет каждый фокус возвращает через 3 оборота")
 
-        i = int(np.searchsorted(ts, t % (2 * math.pi))) % len(ts)
-        marker.set_data([ts[i], ts[i]], [gap1[i], gap2[i]])
+        i = min(int(np.searchsorted(ts, turn)), len(ts) - 1)
+        marker.set_data([ts[i]] * 3,
+                        [dist["u1u2"][i], dist["u1d"][i], dist["du2"][i]])
 
-        return [tri, arc_head, marker] + list(dots.values())
+        artists = [tri, arc_head, marker] + list(dots.values())
+        for k in COLORS:
+            artists += [arcs[k], arc_ticks[k], arc_fronts[k]]
+        return artists
 
     return update
 
