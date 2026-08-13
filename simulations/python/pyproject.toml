@@ -1,0 +1,30 @@
+[project]
+name = "theory-simulations"
+version = "0.1.0"
+description = "Численные модели и визуализации к теоретической части TheoryOfAnything"
+readme = "README.md"
+requires-python = ">=3.12"
+
+dependencies = [
+    "numpy>=1.26,<3",
+    "matplotlib>=3.8,<4",   # нужен Axes3D.set_box_aspect(zoom=...) и matplotlib.typing
+    "sympy>=1.12,<2",       # только для CubeSpace.py
+    "pyqt6>=6.6,<7",        # интерактивный бэкенд; без него lib/backend.py уходит на Agg
+    "scipy>=1.18.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+]
+
+[tool.uv]
+# Проект не собирается как устанавливаемый пакет: скрипты запускаются из этой
+# папки как есть, а lib/ импортируется по относительному пути. uv в этом режиме
+# создаёт окружение и ставит только зависимости.
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["."]
+pythonpath = ["."]
+addopts = "-q"

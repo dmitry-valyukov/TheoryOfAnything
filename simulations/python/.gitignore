@@ -1,4 +1,9 @@
-lib/__pycache__
-.venv
-.vscode
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.vscode/
+.ipynb_checkpoints/
+.pytest_cache/
 
+# uv.lock НЕ игнорируется — он и есть гарантия воспроизводимости

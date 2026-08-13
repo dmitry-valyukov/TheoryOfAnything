@@ -1,9 +1,8 @@
 import lib.plot as plot
+from lib.plot import rgba
 from lib.torus import Torus
 
 import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
 
 # --- Параметры модели электрона ---
 num_points = 400  # Количество точек на волновой нити
@@ -19,7 +18,7 @@ ax = plot.init("Электрон в ОТО: Динамика самосопря�
                theme = 'Light')
 
 # Отрисовка сетки рог-тора
-tor.plot(ax, 60)
+tor.plot(ax, 32)
 
 CONST_PI = np.pi
 CONST_2PI = CONST_PI * 2
@@ -30,9 +29,13 @@ theta_wave = np.linspace(0, 4 * CONST_PI, num_points)
 # Спин 1/2, обход 4*pi
 theta_wave2 = 0.5 * theta_wave
 
-# Шаг для отрисовки векторов Картана (каждая 15-й точка)
+# Шаг для отрисовки векторов Картана (каждая 15-я точка)
 step = 15
 theta_quiver = theta_wave[::step]
+num_arrows = len(theta_quiver)
+
+# Длина стрелки Картана (векторы (tx,ty,tz) уже единичной нормы)
+ARROW_LEN = 0.25
 
 # Создаем пустые графические объекты, которые будут обновляться в анимации
 #wave_line = plot.Segments(ax)
@@ -44,7 +47,8 @@ for i in range(num_ribbon_lines):
     line = plot.Segments(ax, cmap='hsv', linewidths=4.0, alpha=0.5)
     wave_ribbon.append(line)
 
-quiver_arrows = [ax.quiver([], [], [], [], [], [], length=0.25, color='blue', normalize=True, pivot='tail') for _ in range(len(theta_quiver))]
+# Одна переиспользуемая коллекция вместо 27 отдельных ax.quiver() на каждом кадре
+quiver_arrows = plot.Arrows(ax, num_arrows, rgba('gold', 0.9))
 
 # Приращение фазы на фрейм
 dphi = CONST_2PI / num_frames
@@ -53,7 +57,6 @@ colors0 = np.linspace(0, 1.5, num_points) % 1.0
 
 # 4. Функция обновления кадра анимации
 def update(frame):
-    global quiver_arrows
     phase = dphi * frame
 
     # Смещение фазы волнового фронта во времени
@@ -96,22 +99,15 @@ def update(frame):
     y_q = (R + r * np.cos(phi_quiver)) * np.sin(theta_quiver)
     z_q = r * np.sin(phi_quiver)
 
-    # Направления векторов кручения
-    u_q = np.cos(phi_quiver) * np.cos(theta_quiver)
-    v_q = np.cos(phi_quiver) * np.sin(theta_quiver)
-    w_q = np.sin(phi_quiver)
+    # Направления векторов кручения (норма тождественно равна 1)
+    u_q = ARROW_LEN * np.cos(phi_quiver) * np.cos(theta_quiver)
+    v_q = ARROW_LEN * np.cos(phi_quiver) * np.sin(theta_quiver)
+    w_q = ARROW_LEN * np.sin(phi_quiver)
 
-    # Удаляем старые стрелки Quiver и отрисовываем новые
-    for arrow in quiver_arrows:
-        arrow.remove()
+    # Обновляем геометрию стрелок in-place — без remove()/пересоздания
+    quiver_arrows.recalc(x_q, y_q, z_q, u_q, v_q, w_q)
 
-    quiver_arrows = []
-    for i in range(len(theta_quiver)):
-        arrow = ax.quiver(x_q[i], y_q[i], z_q[i], u_q[i], v_q[i], w_q[i],
-                          length=0.25, color='gold', normalize=True, pivot='tail')
-        quiver_arrows.append(arrow)
-
-    return wave_ribbon + quiver_arrows
+    return wave_ribbon + [quiver_arrows]
 
 # Запуск зацикленной анимации
 plot.animate(update, num_frames, 1000/FPS)

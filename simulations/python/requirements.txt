@@ -1,0 +1,10 @@
+# ЭТОТ ФАЙЛ — НЕ ИСТОЧНИК ИСТИНЫ.
+#
+# Окружение задаётся парой pyproject.toml + uv.lock (см. README.md).
+# requirements.txt нужен только как запасной путь для тех, у кого нет uv;
+# он ГЕНЕРИРУЕТСЯ из лока и правится не здесь, а в pyproject.toml:
+#
+#     uv export --frozen --no-dev --format requirements-txt > requirements.txt
+#
+# После правки зависимостей в pyproject.toml выполните `uv lock`, затем
+# перегенерируйте этот файл командой выше и закоммитьте оба.

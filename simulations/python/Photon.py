@@ -11,15 +11,16 @@ FPS = 60
 # Количество полных периодов (должно быть четное: 2, 4, 6, 8...)
 num_periods = 2
 
+# --- Инициализация 3D сцены ---
+# init() выставляет plot.SIZE, поэтому геометрию считаем ПОСЛЕ него
+ax = plot.init(f"ФОТОН в ОТО: Бегущая винтовая фаза внутри временной моды {num_periods*2}π",
+               zoom = 4, elev = 30, azim = -45)
+
 # Радиус фигуры
 R = plot.SIZE / 2.0
 
 # Условная амплитуда упругого сдвига вакуума (координаты радужной нити)
 R_AMP = R / 6.0
-
-# --- Инициализация 3D сцены ---
-ax = plot.init(f"ФОТОН в ОТО: Бегущая винтовая фаза внутри временной моды {num_periods*2}π",
-               zoom = 4, elev = 30, azim = -45)
 
 # Бугущая линия "волны"
 lc = plot.Segments(ax)
@@ -30,7 +31,7 @@ zeros = np.zeros(num_points)
 
 # Центральная ось полета
 center_line_width = 2
-center_line, = ax.plot(x_axis, zeros, zeros, color='white', linestyle='--', alpha=0.5, linewidth=center_line_width)
+center_line, = ax.plot(x_axis, zeros, zeros, color=plot.FG_COLOR, linestyle='--', alpha=0.5, linewidth=center_line_width)
 
 # Создаем постоянные контейнеры для стрелок
 num_arrows = (num_points-1)//arrow_step
