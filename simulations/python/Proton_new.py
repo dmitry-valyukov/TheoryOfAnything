@@ -51,6 +51,8 @@ from matplotlib.collections import LineCollection
 from matplotlib.patches import Arc, Circle, FancyArrowPatch
 from mpl_toolkits.mplot3d.art3d import Line3DCollection
 
+import RotationPlanes as RP
+
 from lib.modes import to_segments
 from lib.torus import Torus
 
@@ -95,6 +97,13 @@ COLOUR_0 = {"u1": Fraction(0), "d": Fraction(1, 3), "u2": Fraction(2, 3)}
 #: (5.9.5) следует omega * T_цв = 4pi — ровно два полных цикла 2pi.
 #: Величина выведена, а не подобрана.
 PHASE_PER_TURN = 4.0 * math.pi
+
+#: модельные входы для счёта плоскостей: ось стоит у d, ходит по дуге у u.
+#: Это ПРОВЕРОЧНЫЕ входы, а не решение уравнений поля (T-36).
+OMEGA_SAMPLE = {k: (RP.sample_axis_fixed(SENSE[k]) if PLANES[k] == 1
+                    else RP.sample_axis_arc(SENSE[k])) for k in PLANES}
+PLANE_FRACTIONS = {k: RP.plane_spectrum(OMEGA_SAMPLE[k])["fractions"]
+                   for k in PLANES}
 
 #: радиальные сдвиги трёх дуг внутри трубки — чтобы они не сливались в одну
 #: линию там, где идут по общему участку нити. Величина чисто изобразительная.
@@ -181,20 +190,29 @@ def wound_curve_offset(theta, off: float = 0.0):
     return rad * np.cos(theta), rad * np.sin(theta), rr * np.sin(phi)
 
 
-def mode_arc(theta0: float, frac, progress: float, off: float = 0.0,
-             num: int = 260):
+def mode_arc(theta0: float, frac, off: float = 0.0, num: int = 260):
     """
-    Дуга, пройденная модой за долю progress цветового оборота.
+    Дуга, занимаемая модой: её доля полного обхода.
 
-    Полный спинорный обход есть 4pi по theta. Мода проходит за оборот долю
-    frac от него: u — плюс 2/3 (то есть 8pi/3 вперёд), d — минус 1/3
-    (4pi/3 назад). Ни одна дуга сама на себя не замыкается — это и есть
-    «дефицит обхода» (5.11.1), видимый непосредственно.
+    Полный спинорный обход есть 4pi по theta. Мода занимает долю frac от него:
+    u — плюс 2/3 (8pi/3 вперёд), d — минус 1/3 (4pi/3 назад). Ни одна дуга
+    сама на себя не замыкается — это и есть «дефицит обхода» (5.11.1).
+
+    Длина дуги ПОСТОЯННА, а движение передаётся бегущей по ней волной
+    яркости: иначе дуга росла бы и обрывалась на каждом обороте, и анимация
+    не зацикливалась бы гладко.
     """
-    span = float(frac) * 4.0 * math.pi * progress
+    span = float(frac) * 4.0 * math.pi
     th = np.linspace(theta0, theta0 + span, num)
     x, y, z = wound_curve_offset(th, off)
     return th, np.stack([x, y, z], axis=1)
+
+
+def running_bump(s_, phase: float, width: float = 0.30):
+    """Гладкий периодический горб яркости, бегущий по дуге. Период ровно 1."""
+    x = (np.asarray(s_, dtype=float) - phase) % 1.0
+    d = np.minimum(x, 1.0 - x) / width
+    return np.exp(-0.5 * d * d)
 
 
 def front_ticks(th, off: float = 0.0, half: float = 0.13, step: int = 22):
@@ -553,10 +571,10 @@ def build_figure():
 
     # --- откуда берётся заряд ---
     ax_q.set_xlim(-0.1, 10.2)
-    ax_q.set_ylim(-1.25, 4.05)
+    ax_q.set_ylim(-1.60, 4.05)
     ax_q.axis("off")
     ax_q.set_title("Откуда берётся ±2/3 и ∓1/3\n"
-                   "заряд — СКОЛЬКО плоскостей, цвет — КАКИЕ (5.2)",
+                   "n_П = rank⟨ωωᵀ⟩ — сколько плоскостей; цвет — какие (5.2)",
                    color="white", fontsize=11, pad=6)
     slot_patches, sense_arcs, q_texts = {}, {}, {}
     for row, k in enumerate(("u1", "d", "u2")):
@@ -565,15 +583,17 @@ def build_figure():
                   weight="bold", ha="center", va="center")
         cells = []
         for j in range(3):
-            cx = 1.9 + 1.05 * j
-            ax_q.add_patch(Circle((cx, y), 0.40, fill=False, ec="#4a4a46",
-                                  lw=1.1))
-            c = Circle((cx, y), 0.34, fc="none", ec="none")
-            ax_q.add_patch(c)
-            cells.append(c)
+            x0 = 1.35 + 1.35 * j
+            ax_q.plot([x0, x0 + 1.15], [y - 0.30, y - 0.30],
+                      color="#333331", lw=1.0)
+            ax_q.plot([x0 + RP.TOL * 1.15] * 2, [y - 0.36, y + 0.36],
+                      color="#4a4a46", lw=0.8, ls=":")
+            bar = ax_q.barh(y, 0.0, height=0.44, left=x0, color="none",
+                            edgecolor="none")[0]
+            cells.append((bar, x0))
             if row == 0:
-                ax_q.text(cx, 3.62, f"{j + 1}", color="#6a6a64", fontsize=8.5,
-                          ha="center", va="center")
+                ax_q.text(x0 + 0.58, 3.62, f"λ{j + 1}", color="#6a6a64",
+                          fontsize=8.5, ha="center", va="center")
         slot_patches[k] = cells
         # знак намотки: кривая стрелка, направление читается однозначно
         cx0 = 5.85
@@ -595,11 +615,13 @@ def build_figure():
     ax_q.plot([1.4, 9.9], [0.28, 0.28], color="#4a4a46", lw=0.9)
     ax_q.text(9.75, -0.16, "+2/3 + 2/3 − 1/3 = +1", color="white",
               fontsize=12, weight="bold", ha="right", va="center")
-    ax_q.text(0.1, -0.90,
-              "закрашенные кружки — задействованные плоскости вращения, их цвет "
-              "есть цветовой заряд;\nпереключение происходит скачком при "
-              "цветовом обмене. Гипотеза 5.2, не вывод.",
-              color="#898781", fontsize=8.5, ha="left", va="center")
+    ax_q.text(0.1, -1.15,
+              "полосы — доли собственных значений матрицы ⟨ωωᵀ⟩; за порогом "
+              f"(пунктир, {RP.TOL}) — задействованная плоскость,\nцвет полосы "
+              "есть цветовой заряд. Ранг целочислен и устойчив к шуму — отсюда "
+              "точная квантованность.\nВход ω(t) здесь МОДЕЛЬНЫЙ, а не решение "
+              "уравнений поля: см. T-36 и RotationPlanes.py.",
+              color="#898781", fontsize=8.0, ha="left", va="center")
 
     # --- счётчик обхода ---
     ax_arc.set_aspect("equal")
@@ -726,7 +748,8 @@ def make_update(state):
     hsv = plt.get_cmap("hsv")
 
     def update(frame):
-        turn = TURNS * frame / N_FRAMES        # цветовых оборотов пройдено
+        # цветовых оборотов пройдено; wrap делает анимацию точно зацикленной
+        turn = (TURNS * frame / N_FRAMES) % TURNS
         cphase = focus_colour_phase(turn)
 
         # Внутренняя фаза БЕЖИТ по нити. Скорость не свободна: T_d = T_цв
@@ -798,18 +821,38 @@ def make_update(state):
             else:
                 active = {0, 1, 2} - {j}          # у u свободна плоскость j
 
-        # дуги, пройденные модами: длина = доля обхода, знак = сторона
-        prog = turn % 1.0
+            # доли собственных значений M = <omega omega^T>: большие уходят
+            # в задействованные плоскости, малые — в свободные
+            big = sorted(PLANE_FRACTIONS[k], reverse=True)
+            vals = [0.0] * 3
+            for pos, idx in enumerate(sorted(active)):
+                vals[idx] = float(big[pos])
+            rest = list(big[len(active):])
+            for idx in [i for i in range(3) if i not in active]:
+                vals[idx] = float(rest.pop(0)) if rest else 0.0
+            for idx, (bar, _) in enumerate(slot_patches[k]):
+                bar.set_width(1.15 * vals[idx])
+                if vals[idx] > RP.TOL:
+                    bar.set_facecolor(hsv(cphase[k]))
+                    bar.set_alpha(0.92)
+                else:
+                    bar.set_facecolor("#3a3a37")
+                    bar.set_alpha(1.0)
+
+        # дуги мод: длина постоянна (доля обхода), движение — бегущая волна
         for k in COLORS:
-            th, pts = mode_arc(thetas[k], ARC[k], prog, ARC_OFFSET[k])
+            th, pts = mode_arc(thetas[k], ARC[k], ARC_OFFSET[k])
             base_rgb = mcolors.to_rgb(COLORS[k])
-            if len(pts) > 1:
-                arcs[k].set_segments(to_segments(pts[:, 0], pts[:, 1], pts[:, 2]))
-                ramp = np.linspace(0.25, 1.0, len(pts) - 1)
-                arcs[k].set_color([(*base_rgb, float(a)) for a in ramp])
-                arc_ticks[k].set_segments(front_ticks(th, ARC_OFFSET[k]))
-                arc_fronts[k].set_data([pts[-1, 0]], [pts[-1, 1]])
-                arc_fronts[k].set_3d_properties([pts[-1, 2]])
+            s_ = np.linspace(0.0, 1.0, len(pts))
+            bump = running_bump(s_, turn)
+            arcs[k].set_segments(to_segments(pts[:, 0], pts[:, 1], pts[:, 2]))
+            alpha = 0.22 + 0.78 * bump[:-1]
+            arcs[k].set_color([(*base_rgb, float(a)) for a in alpha])
+            arcs[k].set_linewidths(1.6 + 4.0 * bump[:-1])
+            arc_ticks[k].set_segments(front_ticks(th, ARC_OFFSET[k]))
+            i_head = int(np.argmax(bump))
+            arc_fronts[k].set_data([pts[i_head, 0]], [pts[i_head, 1]])
+            arc_fronts[k].set_3d_properties([pts[i_head, 2]])
 
         # цветовой круг
         for k in COLORS:
@@ -833,7 +876,7 @@ def make_update(state):
             "синглет держится непрерывно, а не только на целых оборотах\n"
             "свой цвет каждый фокус возвращает через 3 оборота")
 
-        i = min(int(np.searchsorted(ts, turn)), len(ts) - 1)
+        i = min(int(np.searchsorted(ts, turn % TURNS)), len(ts) - 1)
         marker.set_data([ts[i]] * 3,
                         [dist["u1u2"][i], dist["u1d"][i], dist["du2"][i]])
 
