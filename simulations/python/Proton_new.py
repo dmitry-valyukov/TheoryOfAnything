@@ -28,6 +28,15 @@
    За один цветовой оборот u проходит 2/3 полного спинорного обхода 4pi,
    d — 1/3 в обратную сторону. Сумма трёх дуг замыкается ровно в круг: +1.
 
+6. **Поляризация показана полем, а не траекторией** (T-37, 2.5.7). Вдоль
+   каждой дуги рисуется само поле смещений u поперёк нити: у u-мод вектор
+   обходит окружность в сечении (круговая поляризация, две плоскости
+   вращения — стрелки образуют винт вдоль дуги, знак винта = знак намотки),
+   у d — качается вдоль одного отрезка (линейная поляризация, одна
+   плоскость — стрелки лежат в одной плоскости и меняют лишь длину и знак).
+   Это свойство поля в окрестности дуги, а не точки, и изображается законно;
+   локальные петли у фокуса (точка не имеет обхода) отвергнуты.
+
 Запуск:
     python Proton_new.py            # анимация
     python Proton_new.py --check    # только численные проверки, без окна
@@ -54,6 +63,7 @@ from mpl_toolkits.mplot3d.art3d import Line3DCollection
 import RotationPlanes as RP
 
 from lib.modes import to_segments
+from lib.plot import Arrows, rgba
 from lib.torus import Torus
 
 # ---------------------------------------------------------------------------
@@ -108,6 +118,12 @@ PLANE_FRACTIONS = {k: RP.plane_spectrum(OMEGA_SAMPLE[k])["fractions"]
 #: радиальные сдвиги трёх дуг внутри трубки — чтобы они не сливались в одну
 #: линию там, где идут по общему участку нити. Величина чисто изобразительная.
 ARC_OFFSET = {"u1": 0.22, "d": 0.0, "u2": -0.22}
+
+#: стрелки поля смещений вдоль дуги (T-37): число на дугу, амплитуда,
+#: пространственных периодов поляризационного винта на дугу
+N_POL = 14
+POL_AMP = 0.42 * r
+POL_TURNS = {"u1": 2.0, "u2": 2.0, "d": 1.0}
 
 #: сколько цветовых оборотов проигрывает анимация. Каждый фокус возвращает
 #: свой исходный цвет ровно через 3 оборота (проверка в check(), пункт 6).
@@ -223,6 +239,33 @@ def front_ticks(th, off: float = 0.0, half: float = 0.13, step: int = 22):
     a = np.stack(wound_curve_offset(sel, off - half), axis=1)
     b = np.stack(wound_curve_offset(sel, off + half), axis=1)
     return np.stack([a, b], axis=1)
+
+
+def polarization_field(k: str, th, off: float, run: float, psi: float):
+    """
+    Поле смещений u поперёк нити вдоль дуги моды k (T-37).
+
+    В каждой точке дуги берётся репер (t, n, b); фаза Phi бежит вдоль дуги
+    (POL_TURNS периодов) и во времени (run, psi):
+        u-моды: u = A [cos(Phi) n + sense * sin(Phi) b] — вектор обходит
+                окружность в сечении: круговая поляризация, две плоскости;
+        d:      u = A cos(Phi) n — вектор качается вдоль отрезка:
+                линейная поляризация, одна плоскость.
+    Возвращает (начала, векторы) формы (N_POL, 3).
+    """
+    sel = np.linspace(th[0], th[-1], N_POL)
+    frac = (sel - th[0]) / max(th[-1] - th[0], 1e-9)
+    phi = 2.0 * math.pi * POL_TURNS[k] * frac - OMEGA[k] * run - psi
+    origins = np.stack(wound_curve_offset(sel, off), axis=1)
+    vecs = np.zeros_like(origins)
+    for i, thi in enumerate(sel):
+        _, n, b = local_frame(float(thi))
+        if PLANES[k] == 1:
+            vecs[i] = POL_AMP * math.cos(phi[i]) * n
+        else:
+            vecs[i] = POL_AMP * (math.cos(phi[i]) * n
+                                 + SENSE[k] * math.sin(phi[i]) * b)
+    return origins, vecs
 
 
 def _slots(theta_kern: float) -> dict:
@@ -557,6 +600,11 @@ def build_figure():
         arc_ticks[k] = tk
         arc_fronts[k] = ax3d.plot([], [], [], marker="o", ms=10.0, ls="none",
                                   color=COLORS[k], mec="white", mew=1.0)[0]
+    # поле смещений вдоль дуг: винт у u, качание в плоскости у d (T-37)
+    pol_arrows = {k: Arrows(ax3d, N_POL, rgba(COLORS[k], 0.95),
+                            arrow_length_ratio=0.28) for k in COLORS}
+    for k in COLORS:
+        pol_arrows[k].set_linewidths(1.3)
 
     tri = ax3d.plot([], [], [], color="white", lw=1.1, ls="--", alpha=0.55)[0]
     # заливка маркера = цветовая фаза, обод = опознавательный цвет моды,
@@ -726,7 +774,7 @@ def build_figure():
     return dict(fig=fig, ax3d=ax3d, tri=tri, dots=dots, tags=tags,
                 slot_patches=slot_patches, sense_arcs=sense_arcs,
                 arcs=arcs, arc_ticks=arc_ticks, arc_fronts=arc_fronts,
-                thread=thread, thread_theta=thread_theta,
+                pol_arrows=pol_arrows, thread=thread, thread_theta=thread_theta,
                 note3d=note3d, arc_patches=arc_patches, solo=solo,
                 arc_head=arc_head, arc_note=arc_note, col_dots=col_dots,
                 col_tags=col_tags, col_trail=col_trail, col_note=col_note,
@@ -743,6 +791,7 @@ def make_update(state):
     slot_patches, sense_arcs = state["slot_patches"], state["sense_arcs"]
     arcs, arc_ticks = state["arcs"], state["arc_ticks"]
     arc_fronts = state["arc_fronts"]
+    pol_arrows = state["pol_arrows"]
     thread, thread_theta = state["thread"], state["thread_theta"]
     marker, ts, dist = state["marker"], state["ts"], state["dist"]
     hsv = plt.get_cmap("hsv")
@@ -791,7 +840,10 @@ def make_update(state):
             f"   (в покое {100 * rest['spread']:.1f} %)\n"
             f"расстояния от оси различаются в {m['axis_ratio']:.2f} раза"
             f"   ({', '.join(f'{v * scale:.2f}' for v in sorted(m['axis'].values()))} фм)\n"
-            "Δψ(u₁,u₂) = π — фазовый развод Паули, в координаты не входит")
+            "Δψ(u₁,u₂) = π — фазовый развод Паули, в координаты не входит\n"
+            "стрелки — поле смещений u поперёк нити: у u вектор обходит окружность\n"
+            "(круговая поляризация, винт вдоль дуги, две плоскости), у d качается\n"
+            "вдоль отрезка (линейная, одна плоскость) — 2.5.7, T-37")
 
         # счётчик обхода: дуги встык, сумма замыкается ровно в круг
         turn_frac = turn % 1.0
@@ -853,6 +905,10 @@ def make_update(state):
             i_head = int(np.argmax(bump))
             arc_fronts[k].set_data([pts[i_head, 0]], [pts[i_head, 1]])
             arc_fronts[k].set_3d_properties([pts[i_head, 2]])
+            # поле смещений: винт (u, круговая) против качания (d, линейная)
+            org, vec = polarization_field(k, th, ARC_OFFSET[k], run, psis[k])
+            pol_arrows[k].recalc(org[:, 0], org[:, 1], org[:, 2],
+                                 vec[:, 0], vec[:, 1], vec[:, 2])
 
         # цветовой круг
         for k in COLORS:
@@ -882,7 +938,7 @@ def make_update(state):
 
         artists = [tri, arc_head, marker] + list(dots.values())
         for k in COLORS:
-            artists += [arcs[k], arc_ticks[k], arc_fronts[k]]
+            artists += [arcs[k], arc_ticks[k], arc_fronts[k], pol_arrows[k]]
         return artists
 
     return update
