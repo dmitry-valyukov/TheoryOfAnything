@@ -22,6 +22,9 @@
 
 from __future__ import annotations
 
+# метаданные для панели запуска (SimPanel.py)
+PANEL = {"group": 10, "kind": "рендер PNG"}
+
 import argparse
 import os
 

@@ -55,4 +55,4 @@ echo Если ошибка про рассинхронизацию лока - в
 
 :end
 echo.
-pause
+rem pause
