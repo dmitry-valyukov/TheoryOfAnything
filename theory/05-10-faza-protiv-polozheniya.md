@@ -216,3 +216,7 @@ $$2.739\,r \ \ldots \ 4.236\,r, \qquad \text{размах } 45.3\%$$
 ## Численная проверка
 
 `simulations/python/ProtonColor.py` (`python ProtonColor.py`), раздел 10 отчёта.
+
+---
+
+*[⬆](05-cvet-i-adrony.md) · [🏠](index.md)*

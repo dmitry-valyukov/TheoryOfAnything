@@ -61,3 +61,7 @@ $$\text{продольный канал:} \quad v_{\text{отн}} \equiv 0 \ \Ri
 $$c_L \to \infty \ \longleftrightarrow \ \text{связь } \nabla\cdot\mathbf{u} = 0, \ \text{ мгновенное поле давления } p \sim Q_{kl}/r^3$$
 
 $$\text{монополь} = 0, \ \text{диполь} = 0 \ \Longrightarrow \ \text{статические } 1/r\text{-потенциалы живут не здесь}$$
+
+---
+
+*[⬆](07-gravitaciya.md) · [🏠](index.md)*

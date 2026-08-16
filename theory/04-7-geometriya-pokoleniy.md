@@ -173,3 +173,7 @@ $$\tau_n \to \tau_n + i\gamma_n: \qquad \operatorname{Re} \to m_n, \quad \operat
 Однородность Коиде и вид допустимой поправки:
 
 $$R[c\,m_i] = R[m_i] \ \Longrightarrow \ \delta m \propto m \ \text{бесполезна}; \qquad m_n = E_{\text{узла}} + c\,n^2$$
+
+---
+
+*[⬆](04-zaryad-i-leptony.md) · [🏠](index.md)*

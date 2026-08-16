@@ -91,3 +91,7 @@ $$\mathbf{E} = -\frac{\partial \mathbf{u}}{\partial t}, \qquad \mathbf{B} = \nab
 $$c^2 \nabla^2 \mathbf{u} = \frac{\partial^2 \mathbf{u}}{\partial t^2}$$
 
 $$\nabla \cdot \mathbf{E} = 0, \quad \nabla \cdot \mathbf{B} = 0, \quad \nabla \times \mathbf{E} = -\frac{\partial \mathbf{B}}{\partial t}, \quad \nabla \times \mathbf{B} = \frac{1}{c^2}\frac{\partial \mathbf{E}}{\partial t}$$
+
+---
+
+*[⬆](03-elektrodinamika.md) · [🏠](index.md)*

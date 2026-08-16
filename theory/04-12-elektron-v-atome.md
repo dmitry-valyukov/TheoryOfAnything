@@ -78,3 +78,7 @@ $$\bar\lambda_C = 386.159 \ \text{фм}, \qquad a_0 = 52\,917.7 \ \text{фм}, \
 ## Численная проверка
 
 `simulations/python/SolitonExistence.py` (`python SolitonExistence.py`), разделы 5 и 6.
+
+---
+
+*[⬆](04-zaryad-i-leptony.md) · [🏠](index.md)*

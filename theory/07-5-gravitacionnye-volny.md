@@ -102,3 +102,7 @@ $$h_{ij} \sim \delta\langle u_iu_j\rangle \qquad (\text{волна коррел�
 $$6 - 3 - 1 = 2 \qquad (\text{поляризации; бесследовость — связь, а не калибровка})$$
 
 $$c_{gw} = c_T = c \qquad (\text{тождественно: тот же носитель, что у света})$$
+
+---
+
+*[⬆](07-gravitaciya.md) · [🏠](index.md)*

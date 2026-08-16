@@ -49,3 +49,7 @@ $$\partial_\mu J_A^\mu = \frac{g^2}{16\pi^2} \operatorname{Tr}\left(F_{\mu\nu} \
 $$l_{\text{planck}} \approx 1.62 \cdot 10^{-35} \ \text{м} \qquad (\text{масштаб механического защемления})$$
 
 $$\rho_{\text{CS}} \nearrow \ \text{в горловине} \ \Longrightarrow \ \text{жёсткий барьер против топологического схлопывания}$$
+
+---
+
+*[⬆](05-cvet-i-adrony.md) · [🏠](index.md)*

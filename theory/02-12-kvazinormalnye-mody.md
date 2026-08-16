@@ -72,3 +72,7 @@ $$\text{нулевые моды: } m=0\!:\ (\mathbf V,-\mathbf V^*),\ (\partial_
 $$\text{сетка: клетка}\ \to\ \pm\sqrt{\epsilon\kappa},\ \epsilon\sim10^{-3}\ \Rightarrow\ |\Omega|\sim0.02\ldots0.04\ \text{— не частота и не ширина}$$
 
 $$\mathrm{Im}\,\Omega_{\rm физ}\le10^{-12}\ \ \text{— упругой ширины нет};\qquad Q_{\rm st}\ \text{не существует}$$
+
+---
+
+*[⬆](02-topologiya-i-massa.md) · [🏠](index.md)*

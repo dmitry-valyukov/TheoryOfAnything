@@ -229,3 +229,7 @@ $$\mathbf W_L \to \mathbf h_+:\quad J_+ = \tfrac{1}{\sqrt2},\ \ J_- = 0;\qquad\q
 ## Численная проверка
 
 `simulations/python/WeakSector.py` (`python WeakSector.py`) и `simulations/python/WeakChirality.py` (спиральный базис, ток перехода, направление $n\to p$). Дублетная арифметика — в точных дробях; времена жизни и периоды — из табличных масс и ширин; контрпример с фотоном использует `RotationPlanes.omega_from_displacement`.
+
+---
+
+*[⬆](04-zaryad-i-leptony.md) · [🏠](index.md)*

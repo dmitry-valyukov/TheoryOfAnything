@@ -70,3 +70,7 @@ $$\pi_3(S^2) \cong \mathbb{Z}$$
 $$\pi_1(SO(3)) = \mathbb{Z}_2 \quad \Longrightarrow \quad \text{период } 4\pi: \ \psi \to -\psi \to \psi \quad \Longrightarrow \quad \text{топологический вес } \pm 1e$$
 
 $$4\pi \ \longrightarrow \ 3 \ \text{суб-шага}, \qquad \frac{\delta\varphi}{4\pi} = \frac13, \qquad q_i \in \left\{+\tfrac{2}{3}, -\tfrac{1}{3}\right\}, \qquad \sum_{i=1}^{3} q_i \in \mathbb{Z}$$
+
+---
+
+*[⬆](04-zaryad-i-leptony.md) · [🏠](index.md)*

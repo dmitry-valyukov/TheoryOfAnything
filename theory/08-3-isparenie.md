@@ -70,3 +70,7 @@ $$W_{\text{флуктуации}} > U_{\text{барьер}} \ \Rightarrow \ E_{\
 Баланс массы:
 
 $$E_{\text{унос}} \uparrow \implies V_{\text{melt}} \downarrow \implies M_{\text{ЧД}} \downarrow$$
+
+---
+
+*[⬆](08-chernye-dyry.md) · [🏠](index.md)*

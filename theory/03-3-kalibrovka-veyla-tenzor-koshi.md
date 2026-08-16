@@ -81,3 +81,7 @@ $$[\mathbf{E} \cdot \mathbf{B}] = [\text{Дж}/\text{м}^3] \ \text{(гаусс�
 ## Численная проверка
 
 Тождество $\rho c^2/G_{\text{shear}} \equiv 1$, размерность $[K]$ и размерность $[\mathbf{E}\cdot\mathbf{B}]$ проверены в подглаве [3.5](03-5-audit-elektrodinamiki.md), разделы 3.5.7–3.5.8; расчёт — `simulations/python/Maxwell.py`.
+
+---
+
+*[⬆](03-elektrodinamika.md) · [🏠](index.md)*

@@ -182,3 +182,7 @@ $$\mu_L > E_{\text{Pl}} \ \Longleftrightarrow \ b < 15.29 \ \Longleftrightarrow 
 ## Программная реализация
 
 Функции `landau_pole()`, `generations_bound()`, `screening_radius()` модуля `simulations/python/AlphaQED.py`.
+
+---
+
+*[⬆](04-zaryad-i-leptony.md) · [🏠](index.md)*

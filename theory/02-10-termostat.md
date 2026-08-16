@@ -68,3 +68,7 @@ $$A^2 = \frac{S_F(\Omega_A)}{m^2\Gamma(\Omega_A)\Omega_A^2} \qquad \xrightarrow{
 $$\#\{\text{уровней}\} = \#\{\text{пиков } J(\omega) \text{ в окне}\}, \qquad \text{у среды в окне пиков нет}$$
 
 $$\text{T-31: отбор} \to \text{закрыт}; \quad \text{существование } E=\hbar\Omega \to \text{T-29}$$
+
+---
+
+*[⬆](02-topologiya-i-massa.md) · [🏠](index.md)*

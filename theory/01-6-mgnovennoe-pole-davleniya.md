@@ -264,3 +264,7 @@ $$\mathbb{P}_T = \mathbb{1} - \nabla\nabla^{-2}\nabla\cdot \quad (\text{нело
 $$\det C_{ab} = k^8 \neq 0 \ \Longrightarrow \ \nabla\cdot\mathbf{u} = 0 \ \text{— связь второго рода}$$
 
 $$\{u_i, \pi_j\}_D = \mathbb{P}^T_{ij}\delta \quad (\text{нелокально}), \qquad \{B_i, E_j\}_D = -\frac{1}{\rho}\varepsilon_{ikj}\partial_k\delta \quad (\text{строго локально})$$
+
+---
+
+*[⬆](01-uprugiy-vakuum.md) · [🏠](index.md)*

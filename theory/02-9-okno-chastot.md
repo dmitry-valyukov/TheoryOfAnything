@@ -85,3 +85,7 @@ $$Q < 154:\ \text{локализован только намотанный то�
 $$\min_{\text{пары}} \left|\ln\frac{r_{ij}}{r_{\text{лепт}}}\right| = \ln 5.2 \qquad \Longrightarrow \qquad \text{T-15} \to \text{T-31}$$
 
 $$\Lambda_e \approx 0.05\ldots0.075,\qquad S_z/Q = 0.42,\qquad g'>0\ (\text{размягчение}),\ h'>0\ (\text{упрочнение})$$
+
+---
+
+*[⬆](02-topologiya-i-massa.md) · [🏠](index.md)*

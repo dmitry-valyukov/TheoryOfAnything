@@ -55,3 +55,7 @@ $$F_{\text{нелин}} \sim \alpha x^3$$
 Логическая цепочка конфайнмента:
 
 $$\text{растяжение узла} \Rightarrow \text{сужение сечения} \Rightarrow \text{планковское насыщение} \Rightarrow \alpha x^3 \uparrow\uparrow \Rightarrow \text{stick-slip разрыв} \Rightarrow q\bar{q}\text{-пара}$$
+
+---
+
+*[⬆](06-konfaynment-i-kvantovanie.md) · [🏠](index.md)*

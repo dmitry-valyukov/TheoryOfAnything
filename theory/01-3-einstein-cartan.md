@@ -55,3 +55,7 @@ $$i\hbar \gamma^\mu \partial_\mu \psi - m_0 c \psi - \beta_n \left(\bar{\psi}\ga
 $$\bar{\psi}\psi = 1, \qquad \text{полоидальный : тороидальный обход} = 2:1 \ \Rightarrow \ \text{спин } 1/2, \qquad \pi_1(SO(3)) = \mathbb{Z}_2 \ \Rightarrow \ \text{период } 4\pi$$
 
 $$P_{-1/2 + i\tau}(\cosh\eta) = 0$$
+
+---
+
+*[⬆](01-uprugiy-vakuum.md) · [🏠](index.md)*

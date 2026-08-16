@@ -183,3 +183,7 @@ $$\#\left\{(i,j,k) : \left|R - \tfrac23\right| < 3\cdot10^{-5}\right\} = 29\,042
 from LeptonSpectrum import koide_report
 koide_report()
 ```
+
+---
+
+*[⬆](04-zaryad-i-leptony.md) · [🏠](index.md)*

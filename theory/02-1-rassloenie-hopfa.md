@@ -61,3 +61,7 @@ $$M \propto \frac{\hbar}{c \cdot r}$$
 ![Электрон: самосопряжённый рог-тор](images/electron-horn-torus.png)
 
 Мёбиусов шаг $\varphi = \theta/2$ и замыкание только при $4\pi$. Разбор рисунка и оговорка о его статусе (визуализация анзаца, а не решение уравнений) — в подглаве [10.3](10-3-atlas-solitonov.md).
+
+---
+
+*[⬆](02-topologiya-i-massa.md) · [🏠](index.md)*

@@ -216,3 +216,7 @@ report()
 Модуль `simulations/python/AlphaQED.py`. Отдельно доступны `beta_coefficient()`, `beta_breakdown()`, `delta_alpha_leptonic()`, `running_table()`, `circularity_check()`, `sign_check()`.
 
 Не путать с `alpha_running.py`, который считает космологический дрейф $\alpha$ по эпохам; настоящий модуль — обычный КЭД-бег по переданному импульсу.
+
+---
+
+*[⬆](04-zaryad-i-leptony.md) · [🏠](index.md)*

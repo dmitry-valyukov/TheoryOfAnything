@@ -60,3 +60,7 @@ $$\Delta\psi_{du} \to 0 \ \ (\text{критическая точка}) \ \xright
 $$\Pi_d \ \longrightarrow \ \Pi_d' \ \ (\text{симметричный переброс через } u\text{-ось}), \qquad \omega_d = \tfrac{1}{2}\omega_u$$
 
 $$\text{стабильность протона} = \text{незатухающий рикошет от барьеров Паули}$$
+
+---
+
+*[⬆](05-cvet-i-adrony.md) · [🏠](index.md)*

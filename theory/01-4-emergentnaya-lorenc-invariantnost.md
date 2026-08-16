@@ -248,3 +248,7 @@ $$\left.\frac{\delta c}{c}\right|_{\text{tree}} \sim \left(\frac{l_{\text{Pl}}}{
 Высокоэнергетический предел:
 
 $$E^2 = m^2c^4 + p^2c^2\left[1 + \xi_2 \left(\frac{pc}{E_{\text{Pl}}}\right)^{2}\right], \qquad \xi_1 = 0$$
+
+---
+
+*[⬆](01-uprugiy-vakuum.md) · [🏠](index.md)*

@@ -187,3 +187,7 @@ $$\left|\frac{d\mathbf{C}}{d\theta}\right| = \sqrt{\text{rad}^2 + \frac{r^2}{4}}
 ## Численная проверка
 
 `simulations/python/FractionalCharge.py` (`python FractionalCharge.py`). Заряды считаются в точной арифметике дробей, без чисел с плавающей точкой; перебор комбинаций до пяти составляющих — полный.
+
+---
+
+*[⬆](05-cvet-i-adrony.md) · [🏠](index.md)*

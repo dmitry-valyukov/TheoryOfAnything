@@ -203,3 +203,7 @@ $$\int(\nabla\cdot\mathbf u)^2 r^2dr = \int|\nabla\mathbf u|^2 r^2dr \qquad (\ma
 $$\text{стационарно} \ \wedge\ \nabla\cdot\mathbf u = 0 \ \wedge\ \mathbf u \nparallel \nabla\times\mathbf u \ \Longrightarrow\ \text{инвариантные торы}$$
 
 $$\text{спин} \leftrightarrow q/p, \qquad H = pq \qquad \text{— два независимых числа}$$
+
+---
+
+*[⬆](02-topologiya-i-massa.md) · [🏠](index.md)*

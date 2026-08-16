@@ -122,3 +122,7 @@ $$\text{нет диссипации} \Rightarrow \text{нет реконнекц
 $$E_{\text{упр}} \ge \frac{\mu}{2}\frac{x_1}{a}|H| \qquad \text{— устойчивость солитона из несжимаемости}$$
 
 $$\kappa(A)\ \text{минимальна при } A = R/r = 1 \qquad \text{— рог-тор выведен, а не постулирован}$$
+
+---
+
+*[⬆](02-topologiya-i-massa.md) · [🏠](index.md)*

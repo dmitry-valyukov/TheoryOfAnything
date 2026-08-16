@@ -105,3 +105,7 @@ $$\mathbf u_{\rm деф} = \frac{nA_0}{r^2}\hat r,\quad A_0 = \frac{d^3}{4\pi},\
 $$\text{на оси узла: } V_\varphi = +iV_\rho,\ V_z = 0 \qquad\text{— гирация} \perp \text{дефект}$$
 
 $$\Delta E_{\rm int} = \frac{4\pi A^2 f(\rho_{\rm ось})}{r_c} < 0,\quad \rho_{\rm ось}\to g/2h\ \text{— дефект связан в центре узла; к уровням поправки нет}$$
+
+---
+
+*[⬆](03-elektrodinamika.md) · [🏠](index.md)*

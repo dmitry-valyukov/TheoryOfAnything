@@ -153,3 +153,7 @@ $$\Gamma^{(1)} \approx 0.048287,\ \ \Gamma^{(2)} \approx 0.049311,\ \ \Gamma^{(3
 $$m_e = 0.511\ \text{МэВ}, \qquad m_\mu \approx 105.66\ \text{МэВ}, \qquad m_\tau \approx 1776.86\ \text{МэВ}$$
 
 Прямой пересчёт по формуле: $m_\mu = 105.96$ МэВ, $m_\tau = 1779.27$ МэВ.
+
+---
+
+*[⬆](04-zaryad-i-leptony.md) · [🏠](index.md)*

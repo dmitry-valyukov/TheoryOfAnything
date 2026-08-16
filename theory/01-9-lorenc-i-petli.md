@@ -60,3 +60,7 @@ $$\text{Коллинз: } \delta c/c\ \text{между секторами} \quad
 $$A_{\rm Зенер} = 0.9998,\quad \nu = 0.251\ (=1/4),\quad \frac{c_{T2}-c_{T1}}{c_T}\sim\frac{1}{\sqrt{N_{\rm св}}}$$
 
 $$\int_0^\Lambda S(k)k^3dk:\ \text{гипероднородность} \Rightarrow \times0.8,\ \text{не}\ \times10^{-20}$$
+
+---
+
+*[⬆](01-uprugiy-vakuum.md) · [🏠](index.md)*

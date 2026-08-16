@@ -124,3 +124,7 @@ $$\frac{c_{\text{local}}}{c_\infty} = 1 - \frac{\delta\langle u^2\rangle}{\langl
 Непрерывный переход к чёрной дыре:
 
 $$r \to r_s \implies \mu \to 0 \implies c_{\text{local}} \to 0$$
+
+---
+
+*[⬆](07-gravitaciya.md) · [🏠](index.md)*

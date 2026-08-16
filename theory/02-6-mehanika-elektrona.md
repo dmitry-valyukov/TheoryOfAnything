@@ -111,3 +111,7 @@ $$\frac{m_\mu}{m_e} = 206.77, \qquad \frac{m_\tau}{m_e} = 3477.2 \qquad \Longrig
 $$\text{решалось: } f(r) \text{ на сфере} \qquad \text{решается теперь: } \mathbf V(\rho,z)\,e^{in\varphi},\ \nabla\cdot\mathbf W = 0$$
 
 $$\text{кинематика закрыта} \ \Longrightarrow \ \text{динамика начата в } 2.8 \ \Longrightarrow \ \text{остался отбор частоты}$$
+
+---
+
+*[⬆](02-topologiya-i-massa.md) · [🏠](index.md)*

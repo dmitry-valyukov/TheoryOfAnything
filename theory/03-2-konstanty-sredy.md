@@ -85,3 +85,7 @@ $$\lambda \to \infty \ (K_{\text{bulk}} \to \infty) \ \Longrightarrow \ \nu \to 
 ## Численная проверка
 
 Мостик $\epsilon_0\mu_0 = \rho/G_{\text{shear}}$ и зависимость разделения от нормировки $\kappa$ проверены в подглаве [3.5](03-5-audit-elektrodinamiki.md), раздел 3.5.6; расчёт — `simulations/python/Maxwell.py`.
+
+---
+
+*[⬆](03-elektrodinamika.md) · [🏠](index.md)*

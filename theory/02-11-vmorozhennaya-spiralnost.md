@@ -66,3 +66,7 @@ $$\Delta E(H) = \chi H^2,\quad \chi \approx 3.7\cdot10^{-4}\ \ (Q = 740,\ n = 1,
 $$H \gtrsim 200:\ \ \text{перестройка — спин} \to \text{орбита},\ \ S_z/Q:\ 0.40 \to 0.03,\ \ R/r:\ 0.41 \to 0.92$$
 
 $$\kappa = \frac{2a\,E_2}{x_1|H|} \to 3.2 \quad \text{у порога, как в 2.8.3}$$
+
+---
+
+*[⬆](02-topologiya-i-massa.md) · [🏠](index.md)*

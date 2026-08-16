@@ -266,3 +266,7 @@ $$E(0) - E(1) = -\frac{g}{8}N^2 + \frac{h}{4}N^3 \qquad \Longrightarrow \qquad N
 ## Численная проверка
 
 `simulations/python/CubicQuintic.py` (`python CubicQuintic.py`). Точное решение контролируется прямой подстановкой; теорема подобия — пятью наборами параметров; радиальная задача решается пристрелкой с двоичным поиском амплитуды.
+
+---
+
+*[⬆](02-topologiya-i-massa.md) · [🏠](index.md)*

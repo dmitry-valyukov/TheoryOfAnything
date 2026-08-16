@@ -155,3 +155,7 @@ $$(\mu, \tau, x): \ R = 2/3 \ \Rightarrow \ x_{\text{низ}}^2 = 0.5106 \ \text
 ## Программная реализация
 
 Все числа воспроизводятся модулем `simulations/python/LeptonSpectrum.py`, функция `fourth_generation_report()`.
+
+---
+
+*[⬆](04-zaryad-i-leptony.md) · [🏠](index.md)*

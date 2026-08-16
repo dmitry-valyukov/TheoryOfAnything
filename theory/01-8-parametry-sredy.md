@@ -123,3 +123,7 @@ $$c = \sqrt{\mu/\rho}, \qquad \hbar = \eta\,\rho\,c\,d^{4}, \qquad G = \frac{3 s
 $$\left(\frac{d}{l_{\text{Pl}}}\right)^{2} = \frac{8\pi}{3}\,\Theta, \qquad \Theta = \frac{\lambda_L L_{\text{mfp}}}{\sigma\eta}, \qquad \Theta \sim 1 \ \Rightarrow \ d \approx 2.9\,l_{\text{Pl}}$$
 
 $$\frac{\partial\,\delta_{\max}}{\partial\ln\Theta} = -\frac{s}{2} \qquad (\text{незнание входит логарифмически})$$
+
+---
+
+*[⬆](01-uprugiy-vakuum.md) · [🏠](index.md)*

@@ -56,3 +56,7 @@ $$\{\gamma_\mu, \gamma_\nu\} = 2\eta_{\mu\nu}, \qquad \gamma_i^2 = +1 \ (i=1,2,3
 $$\left( \nabla^2 - \frac{1}{c^2}\frac{\partial^2}{\partial t^2} \right) \mathbf{\Psi} = 0 \ \xrightarrow{\ Cl_{1,3}(\mathbb{R})\ } \ \{\xi_L, \xi_R\} \ \xrightarrow{\ \text{фаза Берри} \Rightarrow M\ } \ \Psi_{\text{Dirac}}$$
 
 $$\Psi_{\text{Dirac}} = \begin{pmatrix} \xi_L \\ \xi_R \end{pmatrix}, \qquad \left( i\gamma^\mu \partial_\mu - \frac{Mc}{\hbar} \right) \Psi_{\text{Dirac}} = 0$$
+
+---
+
+*[⬆](01-uprugiy-vakuum.md) · [🏠](index.md)*

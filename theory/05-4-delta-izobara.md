@@ -59,3 +59,7 @@ $$\psi_1 = \psi_2 = \psi_3 \ \Longrightarrow \ \text{конструктивна�
 $$W_{\text{удерж}}\big(\Pi_i \perp \Pi_j, \ 90^\circ\big) \ \Longrightarrow \ \Delta M \approx 1232 - 938 = 294 \ \text{МэВ}$$
 
 $$\tau(\Delta^{++}) \sim 10^{-23} \ \text{с}, \qquad \Delta^{++} \to p + \pi^{+}$$
+
+---
+
+*[⬆](05-cvet-i-adrony.md) · [🏠](index.md)*

@@ -65,3 +65,7 @@ $$E_{\text{dyn}}^{\text{сдвиг}}(M_1) \ \longrightarrow \ E_{\text{stat}}^{\
 Закон сложения масс для внешнего наблюдателя:
 
 $$M_{\text{new}} = M_{\text{old}} + M_1$$
+
+---
+
+*[⬆](08-chernye-dyry.md) · [🏠](index.md)*

@@ -112,3 +112,7 @@ $$f'' + \frac{2}{r}f' - \left[m^2 - \omega^2\right]f + g\,f^3 - h\,f^5 = 0, \qqu
 ## Численная проверка
 
 `simulations/python/SolitonExistence.py` (`python SolitonExistence.py`).
+
+---
+
+*[⬆](02-topologiya-i-massa.md) · [🏠](index.md)*

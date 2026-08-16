@@ -67,3 +67,7 @@ $$v(\Psi) = \frac{c}{1 + \alpha\vert\Psi\vert^2}$$
 Принцип Паули:
 
 $$\Psi = 2\psi \ \Rightarrow \ \rho_E \to 4\rho_E \ \Rightarrow \ \beta \notin \{\text{сетка корней } \tau_n\} \ \Rightarrow \ \text{расталкивание}$$
+
+---
+
+*[⬆](02-topologiya-i-massa.md) · [🏠](index.md)*

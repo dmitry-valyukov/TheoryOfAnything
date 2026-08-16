@@ -55,3 +55,7 @@ $$W = \int E^2 \, dV \xrightarrow{\ r \to 0\ } \infty \quad (\text{класси�
 $$\sigma \sim \epsilon \ \longrightarrow \ \sigma \sim \exp(\epsilon) \quad \text{при} \quad r \lesssim l_{\text{planck}} \approx 1.62 \cdot 10^{-35}\ \text{м}$$
 
 $$\Rightarrow \quad W < \infty, \qquad m_0 < \infty, \qquad \text{перенормировка не требуется}$$
+
+---
+
+*[⬆](03-elektrodinamika.md) · [🏠](index.md)*

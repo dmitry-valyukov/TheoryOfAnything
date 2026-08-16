@@ -54,3 +54,7 @@ $$\text{условие резонатора}: \quad \psi_R + \psi_G + \psi_B = 0
 $$\text{диагональные генераторы}: \quad \frac{1}{\sqrt{2}}\left(R\bar{R} - G\bar{G}\right), \qquad \frac{1}{\sqrt{6}}\left(R\bar{R} + G\bar{G} - 2B\bar{B}\right)$$
 
 $$N_g = 6 + 2 = 8 = D^2 - 1 \Big|_{D=3}$$
+
+---
+
+*[⬆](05-cvet-i-adrony.md) · [🏠](index.md)*

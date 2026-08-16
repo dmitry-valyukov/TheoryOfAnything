@@ -91,3 +91,7 @@ $$P_{\text{Pl}} = \frac{c^7}{\hbar G^2} \approx 4.63 \cdot 10^{113} \ \text{Па
 Температурный параметр и деградация квантования:
 
 $$T_{\text{zp}} = 1.0 \ (\text{номинал}), \qquad T_{\text{zp}} \uparrow \Rightarrow \alpha \downarrow \Rightarrow \text{фазовый захват} \ \to \ \text{тепловой шум}$$
+
+---
+
+*[⬆](06-konfaynment-i-kvantovanie.md) · [🏠](index.md)*

@@ -67,3 +67,7 @@ $$\lambda \to \infty, \quad \phi = 0, \quad \nu \to 0.5, \quad n = 1$$
 $$\left( \nabla^2 - \frac{1}{c^2}\frac{\partial^2}{\partial t^2} \right) \mathbf{\Psi} = 0, \qquad c^2 = \frac{\mu}{\rho}, \qquad \nabla \cdot \mathbf{\Psi} = 0$$
 
 $$\epsilon_0 \mu_0 = \frac{\rho}{\mu}$$
+
+---
+
+*[⬆](01-uprugiy-vakuum.md) · [🏠](index.md)*
